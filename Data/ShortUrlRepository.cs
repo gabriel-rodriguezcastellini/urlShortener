@@ -16,7 +16,7 @@ public sealed class ShortUrlRepository
 
     public async Task CreateAsync(ShortUrl shortUrl)
     {
-        if (await Exists(shortUrl.Path))
+        if (await ExistsAsync(shortUrl.Path) || await ExistsDestinationAsync(shortUrl.Destination))
         {
             throw new ShortUrlExistsException($"Shortened URL with path '{shortUrl.Path}' already exists.");
         }
@@ -26,7 +26,7 @@ public sealed class ShortUrlRepository
 
     public async Task DeleteAsync(string path)
     {
-        if (await Exists(path) == false)
+        if (await ExistsAsync(path) == false)
         {
             throw new UnableToDeleteUrlException($"Shortened URL with path '{path}' does not exist.");            
         }
@@ -50,13 +50,14 @@ public sealed class ShortUrlRepository
             var server = database.Multiplexer.GetServer(endpoints[0]);
             var keys = server.Keys();
 
-            foreach (var item in keys)
-            {
-                redisValue = (await database.HashGetAllAsync(item.ToString()))?.LastOrDefault().Value.ToString();
+            foreach (var item in database.Multiplexer.GetServer(database.Multiplexer.GetEndPoints()[0]).Keys())
+            {                
+                redisValue = await database.StringGetAsync(item.ToString());
 
                 if (redisValue.ToString() == path)
                 {
                     valueFound = true;
+                    redisValue = item.ToString();
                     break;
                 }
             }
@@ -70,7 +71,22 @@ public sealed class ShortUrlRepository
         return valueFound ? new ShortUrl(redisValue.ToString(), path) : null;
     }    
 
-    public async Task<bool> Exists(string path) => await database.KeyExistsAsync(path);
+    public async Task<bool> ExistsAsync(string path) => await database.KeyExistsAsync(path);
 
-    private bool ShouldSearchByDestination(string path) => path.Contains(':');
+    private async Task<bool> ExistsDestinationAsync(string destination)
+    {
+        foreach (var item in database.Multiplexer.GetServer(database.Multiplexer.GetEndPoints()[0]).Keys())
+        {
+            var redisValue = await database.StringGetAsync(item.ToString());
+
+            if (redisValue.ToString() == destination)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool ShouldSearchByDestination(string path) => path.Contains(':');    
 }

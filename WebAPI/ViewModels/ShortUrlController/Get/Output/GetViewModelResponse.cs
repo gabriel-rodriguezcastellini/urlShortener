@@ -2,7 +2,7 @@
 
 public class GetViewModelResponse
 {    
-    public string Destination { get; set; } = string.Empty;
+    public string Destination { get; set; } = null!;
     
-    public string Path { get; set; } = string.Empty;
+    public string Path { get; set; } = null!;
 }

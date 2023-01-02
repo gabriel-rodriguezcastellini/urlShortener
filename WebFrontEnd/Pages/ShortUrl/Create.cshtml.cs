@@ -11,10 +11,10 @@ namespace WebFrontEnd.Pages.ShortUrl
     {
         private readonly IHttpClientFactory httpClientFactory;
 
-        public CreateModel(IHttpClientFactory httpClientFactory) => this.httpClientFactory = httpClientFactory;        
+        public CreateModel(IHttpClientFactory httpClientFactory) => this.httpClientFactory = httpClientFactory;
 
         [BindProperty]
-        public Models.ShortUrl ShortUrl { get; set; }
+        public Models.ShortUrl ShortUrl { get; set; } = null!;
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()

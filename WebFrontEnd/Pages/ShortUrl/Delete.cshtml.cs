@@ -14,7 +14,7 @@ namespace WebFrontEnd.Pages.ShortUrl
         public DeleteModel(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
         [BindProperty]
-        public Models.ShortUrl ShortUrl { get; set; }        
+        public Models.ShortUrl ShortUrl { get; set; } = null!;
 
         public async Task<IActionResult> OnPostAsync()
         {

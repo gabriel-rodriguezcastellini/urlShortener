@@ -1,7 +1,5 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using WebAPI.Models;
 using WebAPI.ViewModels.ShortUrlController.Create.Input;
 using WebAPI.ViewModels.ShortUrlController.Create.Output;
 using WebAPI.ViewModels.ShortUrlController.Get.Input;
@@ -69,11 +67,5 @@ public class ShortUrlController : ControllerBase
         }
         await ShortUrlRepository.DeleteAsync(path);
         return NoContent();
-    }
-
-    private static ShortUrlDto ShortUrlToDto(ShortUrl shortUrl) => new()
-    {
-        Destination = shortUrl.Destination,
-        Path = shortUrl.Path
-    };
+    }    
 }

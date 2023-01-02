@@ -1,5 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using WebAPI.ViewModels.ShortUrlController.Create.Input;
 using WebAPI.ViewModels.ShortUrlController.Create.Output;
 using WebAPI.ViewModels.ShortUrlController.Get.Input;
@@ -20,6 +21,24 @@ public class ShortUrlController : ControllerBase
     {
         ShortUrlRepository = shortUrlRepository;
         ShortUrlGenerator = shortUrlGenerator;
+    }
+
+    [HttpGet("{shortUrl}")]
+    public async Task<IActionResult> RedirectAsync([Required][FromQuery] string shortUrl)
+    {
+        if (ShortUrlValidator.ValidatePath(shortUrl, out _))
+        {
+            return BadRequest();
+        }
+
+        var shortUrlRedis = await ShortUrlRepository.GetAsync(shortUrl);
+
+        if (shortUrlRedis == null || string.IsNullOrWhiteSpace(shortUrlRedis.Destination))
+        {
+            return NotFound();
+        }
+
+        return Redirect(shortUrlRedis.Destination);
     }
 
     // GET api/<ShortUrlController>/5
@@ -47,12 +66,20 @@ public class ShortUrlController : ControllerBase
     public async Task<ActionResult<CreateViewModelResponse>> CreateAsync([FromBody] CreateViewModel model)
     {
         var shortUrl = new ShortUrl(model.Destination, model.Path ?? ShortUrlGenerator.Generate());
+
+        if (shortUrl.Validate(out var validationResults) == false)
+        {
+            return ValidationProblem();
+        }
+
         await ShortUrlRepository.CreateAsync(shortUrl);
+
         var response = new CreateViewModelResponse
         {
             Destination = shortUrl.Destination,
             Path = shortUrl.Path
         };
+
         return CreatedAtAction(nameof(GetAsync), new { path = shortUrl.Path }, response);
     }
 

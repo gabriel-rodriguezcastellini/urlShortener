@@ -1,4 +1,5 @@
 ﻿using Data;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using WebAPI.ViewModels.ShortUrlController.Create.Input;
@@ -23,8 +24,8 @@ public class ShortUrlController : ControllerBase
         ShortUrlGenerator = shortUrlGenerator;
     }
 
-    [HttpGet("{shortUrl}")]
-    public async Task<IActionResult> RedirectAsync([Required][FromQuery] string shortUrl)
+    [HttpGet]    
+    public async Task<IActionResult> RedirectAsync([FromQuery] string shortUrl)
     {
         if (ShortUrlValidator.ValidatePath(shortUrl, out _))
         {
@@ -69,7 +70,7 @@ public class ShortUrlController : ControllerBase
 
         if (shortUrl.Validate(out var validationResults) == false)
         {
-            return ValidationProblem();
+            return BadRequest(Results.ValidationProblem(validationResults));
         }
 
         await ShortUrlRepository.CreateAsync(shortUrl);

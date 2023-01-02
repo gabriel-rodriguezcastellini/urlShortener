@@ -10,7 +10,7 @@ public static class ShortUrlValidator
     {
         validationResults = new Dictionary<string, string[]>();
         var isDestinationValid = ValidateDestination(shortUrl.Destination,out var destinationValidationResults);
-        var isPathValid = ValidatePath(shortUrl.Path,out var pathValidationResults);
+        var isPathValid = !ValidatePath(shortUrl.Path,out var pathValidationResults);
 
         validationResults.Add("destination", destinationValidationResults);
         validationResults.Add("path", pathValidationResults);

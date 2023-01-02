@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "webfrontend",
+      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}",
+      "serviceActions": {
+        "redis": "StartWithoutDebugging",
+        "webapi": "StartDebugging",
+        "webfrontend": "StartDebugging"
+      }
+    }
+  }
+}

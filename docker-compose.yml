@@ -2,16 +2,26 @@ version: '3.4'
 
 services:
   webfrontend:
-    image: ${DOCKER_REGISTRY-}webfrontend
+    container_name: web
+    #image: ${DOCKER_REGISTRY-}webfrontend
     build:
       context: .
       dockerfile: WebFrontEnd/Dockerfile
+    ports:
+        - "8080:80"
 
   webapi:
-    image: ${DOCKER_REGISTRY-}webapi
+    container_name: api
+    #image: ${DOCKER_REGISTRY-}webapi
     build:
       context: .
       dockerfile: WebAPI/Dockerfile
+    depends_on: [ redis ]      
+    ports:
+        - "8081:8081"
 
   redis:
    image: redis
+   restart: unless-stopped
+   ports:
+    - "6379:6379"

@@ -46,10 +46,6 @@ public sealed class ShortUrlRepository
 
         if (ShouldSearchByDestination(path))
         {
-            var endpoints = database.Multiplexer.GetEndPoints();
-            var server = database.Multiplexer.GetServer(endpoints[0]);
-            var keys = server.Keys();
-
             foreach (var item in database.Multiplexer.GetServer(database.Multiplexer.GetEndPoints()[0]).Keys())
             {                
                 redisValue = await database.StringGetAsync(item.ToString());
@@ -88,5 +84,5 @@ public sealed class ShortUrlRepository
         return false;
     }
 
-    private bool ShouldSearchByDestination(string path) => path.Contains(':');    
+    private bool ShouldSearchByDestination(string path) => path.Contains('.');    
 }

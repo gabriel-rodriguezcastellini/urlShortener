@@ -22,17 +22,17 @@ public class ExceptionMiddleware
         }
         catch (UnableToDeleteUrlException unableToDeleteUrlException)
         {
-            _logger.LogError("It wasn't possible to delete the URL.");
+            _logger.LogError(unableToDeleteUrlException, "It wasn't possible to delete the URL.");
             await HandleExceptionAsync(httpContext, unableToDeleteUrlException, HttpStatusCode.BadRequest);
         }
         catch (ShortUrlExistsException shortUrlExistsException)
         {
-            _logger.LogError($"Short URL already exists.");
+            _logger.LogError(shortUrlExistsException, $"Short URL already exists.");
             await HandleExceptionAsync(httpContext, shortUrlExistsException, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Something went wrong: {ex}");
+            _logger.LogError(ex, $"Something went wrong: {ex}");
             await HandleExceptionAsync(httpContext, ex);
         }
     }

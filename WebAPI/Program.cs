@@ -49,7 +49,7 @@ builder.Services.AddSwaggerGen();
 //});
 
 //Configure other services up here
-var multiplexer = ConnectionMultiplexer.Connect("redis:6379");
+var multiplexer = ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redis"));
 builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 
 builder.Services.AddTransient<Random>();

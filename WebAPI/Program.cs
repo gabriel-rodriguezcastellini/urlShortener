@@ -9,13 +9,14 @@ using WebAPI.Extensions;
 using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
-
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-    .Enrich.FromLogContext()
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)    
     .WriteTo.Console()
-    .CreateBootstrapLogger(); // <-- Change this line!
-
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()    
+    .WriteTo.Seq(builder.Configuration.GetConnectionString("seq")));
+Serilog.Debugging.SelfLog.Enable(Console.Error);
 // Add services to the container.
 
 builder.Services.AddControllers(options =>
@@ -55,12 +56,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 builder.Services.AddTransient<Random>();
 builder.Services.AddTransient<RandomUrlGenerator>();
 builder.Services.AddTransient<ShortUrlRepository>();
-
-builder.Host.UseSerilog((context, services, configuration) => configuration
-    .ReadFrom.Configuration(context.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext()
-    .WriteTo.Console());
 
 var app = builder.Build();
 

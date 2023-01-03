@@ -3,25 +3,37 @@ version: '3.4'
 services:
   webfrontend:
     container_name: web
-    #image: ${DOCKER_REGISTRY-}webfrontend
+    image: ${DOCKER_REGISTRY-}webfrontend
     build:
       context: .
-      dockerfile: WebFrontEnd/Dockerfile
+      dockerfile: WebFrontEnd/Dockerfile    
     ports:
-        - "8080:80"
+        - "5050:80"
 
   webapi:
     container_name: api
-    #image: ${DOCKER_REGISTRY-}webapi
+    image: ${DOCKER_REGISTRY-}webapi
     build:
       context: .
       dockerfile: WebAPI/Dockerfile
-    depends_on: [ redis ]      
+    depends_on:
+        - redis
+        - seq
     ports:
-        - "8081:8081"
+        - "5051:80"
 
   redis:
    image: redis
    restart: unless-stopped
    ports:
     - "6379:6379"
+
+  seq:
+    image: datalust/seq:latest
+    ports:
+        - "5341:80"
+    environment:
+        - ACCEPT_EULA=Y
+    restart: unless-stopped
+    volumes:
+        - ./seq-data:/data

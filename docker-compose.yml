@@ -24,10 +24,10 @@ services:
 
   redis:
     container_name: redis
-   image: redis
-   restart: unless-stopped
-   ports:
-    - "6379:6379"
+    image: redis
+    restart: unless-stopped
+    ports:
+        - "6379:6379"
 
   seq:
     container_name: seq

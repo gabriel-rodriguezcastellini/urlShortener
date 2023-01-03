@@ -23,12 +23,14 @@ services:
         - "5051:80"
 
   redis:
+    container_name: redis
    image: redis
    restart: unless-stopped
    ports:
     - "6379:6379"
 
   seq:
+    container_name: seq
     image: datalust/seq:latest
     ports:
         - "5341:80"

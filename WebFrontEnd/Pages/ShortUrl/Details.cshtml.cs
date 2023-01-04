@@ -13,7 +13,11 @@ namespace WebFrontEnd.Pages.ShortUrl
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IOptions<AppSettings> appSettings;
 
-        public DetailsModel(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
+        public DetailsModel(IHttpClientFactory httpClientFactory, IOptions<AppSettings> appSettings)
+        {
+            _httpClientFactory = httpClientFactory;
+            this.appSettings = appSettings;
+        }
 
         [BindProperty]
         public Models.ShortUrl ShortUrl { get; set; } = null!;

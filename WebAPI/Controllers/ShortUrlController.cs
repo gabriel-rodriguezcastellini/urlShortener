@@ -13,6 +13,7 @@ namespace WebAPI.Controllers;
 
 [Route("[controller]")]
 [ApiController]
+[Produces("application/json")]
 public class ShortUrlController : ControllerBase
 {
     private readonly ShortUrlRepository ShortUrlRepository;
@@ -24,7 +25,15 @@ public class ShortUrlController : ControllerBase
         ShortUrlGenerator = shortUrlGenerator;
     }
 
-    [HttpGet]    
+    /// <summary>
+    /// Redirects to long URL
+    /// </summary>
+    /// <param name="shortUrl"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RedirectAsync([FromQuery] string shortUrl)
     {
         if (ShortUrlValidator.ValidatePath(shortUrl, out _))
@@ -42,9 +51,15 @@ public class ShortUrlController : ControllerBase
         return Redirect(shortUrlRedis.Destination);
     }
 
-    // GET api/<ShortUrlController>/5
+    /// <summary>
+    /// Gets a specified URL
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>    
     [HttpPost("/[controller]/get-path")]
     [ActionName(nameof(GetAsync))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetViewModelResponse>> GetAsync([FromBody] GetViewModel model)
     {
         var shortUrl = await ShortUrlRepository.GetAsync(model.Path);
@@ -62,8 +77,26 @@ public class ShortUrlController : ControllerBase
         return  Ok(response);
     }
 
-    // POST api/<ShortUrlController>
+    /// <summary>
+    /// Creates a short URL for the large specified one
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>    
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /ShortUrl
+    ///     {
+    ///        "destination": "https://www.google.com",
+    ///        "path": "google"    
+    ///     }
+    ///
+    /// </remarks>
+    /// <response code="201">Returns the newly created URL</response>
+    /// <response code="400">If the URL already exists</response>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateViewModelResponse>> CreateAsync([FromBody] CreateViewModel model)
     {
         var shortUrl = new ShortUrl(model.Destination, model.Path ?? ShortUrlGenerator.Generate());
@@ -84,8 +117,14 @@ public class ShortUrlController : ControllerBase
         return CreatedAtAction(nameof(GetAsync), new { path = shortUrl.Path }, response);
     }
 
-    // DELETE api/<ShortUrlController>/5
+    /// <summary>
+    /// Deletes a specified URL
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>    
     [HttpDelete("{path}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAsync(string path)
     {
         var shortUrl = await ShortUrlRepository.GetAsync(path);

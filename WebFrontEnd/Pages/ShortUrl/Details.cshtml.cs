@@ -1,6 +1,7 @@
 using Common.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Net.Mime;
 using System.Text;
@@ -10,6 +11,7 @@ namespace WebFrontEnd.Pages.ShortUrl
     public class DetailsModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IOptions<AppSettings> appSettings;
 
         public DetailsModel(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
@@ -26,7 +28,7 @@ namespace WebFrontEnd.Pages.ShortUrl
             }
 
             var httpClient = _httpClientFactory.CreateClient();            
-            var response = await httpClient.PostAsync(new Uri("http://webapi/ShortUrl/get-path"), new StringContent(JsonConvert.SerializeObject(ShortUrl), Encoding.UTF8, MediaTypeNames.Application.Json));
+            var response = await httpClient.PostAsync(new Uri($"{appSettings.Value.ApiUrl}/get-path"), new StringContent(JsonConvert.SerializeObject(ShortUrl), Encoding.UTF8, MediaTypeNames.Application.Json));
 
             if (!response.IsSuccessStatusCode)
             {

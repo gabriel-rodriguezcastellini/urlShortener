@@ -14,7 +14,7 @@ using WebAPI.Extensions;
 using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<Context>(optionsAction => optionsAction.UseSqlServer(builder.Configuration.GetConnectionString("db")!));
+builder.Services.AddDbContext<Context>(optionsAction => optionsAction.UseInMemoryDatabase("db"));
 
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
@@ -81,18 +81,6 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
     options.InjectStylesheet("/swagger-ui/custom.css");
 });
-
-try
-{
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<Context>();
-    await context.Database.MigrateAsync();
-}
-catch (Exception x)
-{
-
-    throw;
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

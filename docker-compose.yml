@@ -20,6 +20,7 @@ services:
       dockerfile: WebAPI/Dockerfile
     depends_on:        
         - seq
+        - sqldata
     ports:
         - "5051:80"
 
@@ -33,7 +34,7 @@ services:
         - "5052:80"
     depends_on:
         - webfrontend
-        - webapi   
+        - webapi
 
   seq:
     container_name: seq
@@ -45,3 +46,12 @@ services:
     restart: unless-stopped
     volumes:
         - ./seq-data:/data
+
+  sqldata:
+    container_name: sqldata
+    image: mcr.microsoft.com/mssql/server:2019-latest 
+    environment:
+      - SA_PASSWORD=Pass@word
+      - ACCEPT_EULA=Y
+    ports:
+      - "5433:1433"

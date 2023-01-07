@@ -14,7 +14,7 @@ using WebAPI.Extensions;
 using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<Context>(optionsAction => optionsAction.UseInMemoryDatabase("db"));
+builder.Services.AddDbContext<Context>(optionsAction => optionsAction.UseSqlServer(builder.Configuration.GetConnectionString("db")!));
 
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
@@ -60,7 +60,11 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddTransient<Random>();
 builder.Services.AddTransient<RandomUrlGenerator>();
 builder.Services.AddTransient<ShortUrlRepository>();
-builder.Services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Healthy());
+
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy("This service is healthy"), new string[] { "self" })
+    .AddSqlServer(builder.Configuration.GetConnectionString("db"), name: "APIDb-check", tags: new string[] { "apidb" });
+
 var app = builder.Build();
 app.UseStaticFiles();
 app.UseRouting();
@@ -81,6 +85,17 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
     options.InjectStylesheet("/swagger-ui/custom.css");
 });
+
+try
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<Context>().Database.MigrateAsync();
+}
+catch (Exception exception)
+{
+    Log.Logger.Error(exception, "An error occurred while migrating the database used on context {DbContextName}", nameof(Context));
+    throw;
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

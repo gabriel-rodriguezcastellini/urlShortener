@@ -19,6 +19,7 @@
 		<PackageReference Include="AspNetcore.HealthChecks.Publisher.CloudWatch" Version="6.1.0" />
 		<PackageReference Include="AspNetcore.HealthChecks.Publisher.Datadog" Version="6.0.2" />
 		<PackageReference Include="AspNetcore.HealthChecks.Publisher.Prometheus" Version="6.0.2" />
+		<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="6.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="6.0.5" />
 		<PackageReference Include="AspNetcore.HealthChecks.Publisher.Seq" Version="6.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.5" />
@@ -47,10 +48,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Common\Common.csproj" />
 		<ProjectReference Include="..\Data\Data.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="wwwroot\images\" />
 	</ItemGroup>
 
 </Project>

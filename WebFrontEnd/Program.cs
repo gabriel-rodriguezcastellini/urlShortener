@@ -11,7 +11,7 @@ builder.Services.AddOptions();
 builder.Services.Configure<AppSettings>(builder.Configuration);
 
 builder.Services.AddHealthChecks()
-    .AddCheck("Self", () => HealthCheckResult.Healthy())
+    .AddCheck("Self", () => HealthCheckResult.Healthy("This service is healthy"), new string[] { "self" })
     .AddUrlGroup(new Uri(builder.Configuration.GetValue<string>("ApiHealthCheck")), "api-check", tags: new string[] { "api" });
 
 var app = builder.Build();

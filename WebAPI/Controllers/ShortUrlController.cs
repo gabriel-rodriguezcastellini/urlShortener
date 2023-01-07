@@ -41,14 +41,14 @@ public class ShortUrlController : ControllerBase
             return BadRequest();
         }
 
-        var shortUrlRedis = await ShortUrlRepository.GetAsync(shortUrl);
+        var shortUrlDb = await ShortUrlRepository.GetAsync(shortUrl);
 
-        if (shortUrlRedis == null || string.IsNullOrWhiteSpace(shortUrlRedis.Destination))
+        if (shortUrlDb == null || string.IsNullOrWhiteSpace(shortUrlDb.Destination))
         {
             return NotFound();
         }
 
-        return Redirect(shortUrlRedis.Destination);
+        return Redirect(shortUrlDb.Destination);
     }
 
     /// <summary>
@@ -98,8 +98,12 @@ public class ShortUrlController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateViewModelResponse>> CreateAsync([FromBody] CreateViewModel model)
-    {
-        var shortUrl = new ShortUrl(model.Destination, model.Path ?? ShortUrlGenerator.Generate());
+    {        
+        var shortUrl = new ShortUrl
+        {
+            Destination = model.Destination,
+            Path = model.Path ?? ShortUrlGenerator.Generate()
+        };
 
         if (shortUrl.Validate(out var validationResults) == false)
         {
@@ -132,7 +136,7 @@ public class ShortUrlController : ControllerBase
         {
             return NotFound();
         }
-        await ShortUrlRepository.DeleteAsync(path);
+        await ShortUrlRepository.DeleteAsync(path);        
         return NoContent();
     }    
 }

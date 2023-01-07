@@ -6,8 +6,7 @@
       "composeLaunchAction": "LaunchBrowser",
       "composeLaunchServiceName": "webfrontend",
       "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}",
-      "serviceActions": {
-        "redis": "StartWithoutDebugging",
+      "serviceActions": {        
         "webapi": "StartDebugging",
         "webfrontend": "StartDebugging"
       }

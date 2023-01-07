@@ -1,18 +1,16 @@
 ﻿using Common.Exceptions;
-using StackExchange.Redis;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data;
 
 public sealed class ShortUrlRepository
-{   
-    private readonly IConnectionMultiplexer _connectionMultiplexer;
-    private readonly IDatabase database;
+{       
+    private readonly Context _context;
 
-    public ShortUrlRepository(IConnectionMultiplexer redis)
+    public ShortUrlRepository(Context context)
     {
-        _connectionMultiplexer = redis;
-        database = redis.GetDatabase();
-    }
+        _context = context;
+    }    
 
     public async Task CreateAsync(ShortUrl shortUrl)
     {
@@ -21,7 +19,8 @@ public sealed class ShortUrlRepository
             throw new ShortUrlExistsException($"Shortened URL with path '{shortUrl.Path}' already exists.");
         }
         
-        await database.StringSetAsync(shortUrl.Path, shortUrl.Destination);
+        await _context.ShortUrls.AddAsync(shortUrl);
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(string path)
@@ -30,8 +29,10 @@ public sealed class ShortUrlRepository
         {
             throw new UnableToDeleteUrlException($"Shortened URL with path '{path}' does not exist.");            
         }
-
-        await database.KeyDeleteAsync(path);
+        
+        var url = await _context.ShortUrls.FirstAsync(x => x.Path == path);
+        _context.ShortUrls.Remove(url);
+        await _context.SaveChangesAsync();
 
         if (await GetAsync(path) != null)
         {
@@ -39,50 +40,11 @@ public sealed class ShortUrlRepository
         }
     }
 
-    public async Task<ShortUrl?> GetAsync(string path)
-    {
-        RedisValue redisValue = default;
-        bool valueFound = false;
+    public async Task<ShortUrl?> GetAsync(string path) => await _context.ShortUrls.FirstOrDefaultAsync(x => ShouldSearchByDestination(path) ? x.Destination == path : x.Path == path);
 
-        if (ShouldSearchByDestination(path))
-        {
-            foreach (var item in database.Multiplexer.GetServer(database.Multiplexer.GetEndPoints()[0]).Keys())
-            {                
-                redisValue = await database.StringGetAsync(item.ToString());
+    public async Task<bool> ExistsAsync(string path) => await _context.ShortUrls.AnyAsync(x=> x.Path == path);
 
-                if (redisValue.ToString() == path)
-                {
-                    valueFound = true;
-                    redisValue = item.ToString();
-                    break;
-                }
-            }
-        }
-        else
-        {
-            redisValue = await database.StringGetAsync(path);
-            valueFound = redisValue.HasValue;
-        }        
-
-        return valueFound ? new ShortUrl(redisValue.ToString(), path) : null;
-    }    
-
-    public async Task<bool> ExistsAsync(string path) => await database.KeyExistsAsync(path);
-
-    private async Task<bool> ExistsDestinationAsync(string destination)
-    {
-        foreach (var item in database.Multiplexer.GetServer(database.Multiplexer.GetEndPoints()[0]).Keys())
-        {
-            var redisValue = await database.StringGetAsync(item.ToString());
-
-            if (redisValue.ToString() == destination)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    private async Task<bool> ExistsDestinationAsync(string destination) => await _context.ShortUrls.AnyAsync(x => x.Destination == destination);
 
     private bool ShouldSearchByDestination(string path) => path.Contains('.');    
 }

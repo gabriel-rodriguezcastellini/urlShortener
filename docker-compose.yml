@@ -1,6 +1,6 @@
 version: '3.4'
 
-services:
+services:  
   webfrontend:
     container_name: web
     image: ${DOCKER_REGISTRY-}webfrontend
@@ -9,6 +9,8 @@ services:
       dockerfile: WebFrontEnd/Dockerfile    
     ports:
         - "5050:80"
+    depends_on:
+        - webapi        
 
   webapi:
     container_name: api
@@ -16,18 +18,23 @@ services:
     build:
       context: .
       dockerfile: WebAPI/Dockerfile
-    depends_on:
-        - redis
+    depends_on:        
         - seq
+        - sqldata        
     ports:
         - "5051:80"
 
-  redis:
-    container_name: redis
-    image: redis
-    restart: unless-stopped
+  webstatus:
+    container_name: status
+    image: ${DOCKER_REGISTRY-}webstatus
+    build:
+      context: .
+      dockerfile: WebStatus/Dockerfile    
     ports:
-        - "6379:6379"
+        - "5052:80"
+    depends_on:
+        - webfrontend
+        - webapi   
 
   seq:
     container_name: seq
@@ -39,11 +46,12 @@ services:
     restart: unless-stopped
     volumes:
         - ./seq-data:/data
-
-  rebrow:
-    container_name: rebrow
-    image: marian/rebrow
+  
+  sqldata:
+    container_name: sqldata
+    image: mcr.microsoft.com/mssql/server:2019-latest 
+    environment:
+      - SA_PASSWORD=Pass@word
+      - ACCEPT_EULA=Y
     ports:
-        - "5001:5001"
-    depends_on:
-        - redis
+      - "5433:1433"    

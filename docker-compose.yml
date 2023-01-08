@@ -2,7 +2,9 @@ version: '3.4'
 
 services:  
   webfrontend:
-    container_name: web
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=http://0.0.0.0:80    
     image: ${DOCKER_REGISTRY-}webfrontend
     build:
       context: .
@@ -12,8 +14,7 @@ services:
     depends_on:
         - webapi        
 
-  webapi:
-    container_name: api
+  webapi:    
     image: ${DOCKER_REGISTRY-}webapi
     build:
       context: .
@@ -24,8 +25,7 @@ services:
     ports:
         - "5051:80"
 
-  webstatus:
-    container_name: status
+  webstatus:    
     image: ${DOCKER_REGISTRY-}webstatus
     build:
       context: .
@@ -36,8 +36,7 @@ services:
         - webfrontend
         - webapi
 
-  seq:
-    container_name: seq
+  seq:    
     image: datalust/seq:latest
     ports:
         - "5341:80"
@@ -47,8 +46,7 @@ services:
     volumes:
         - ./seq-data:/data
 
-  sqldata:
-    container_name: sqldata
+  sqldata:    
     image: mcr.microsoft.com/mssql/server:2019-latest 
     environment:
       - SA_PASSWORD=Pass@word

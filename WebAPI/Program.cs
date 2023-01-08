@@ -30,14 +30,22 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 
 Serilog.Debugging.SelfLog.Enable(Console.Error);
 
+builder.Services.AddResponseCaching(options =>
+{
+    options.MaximumBodySize = 1024;
+    options.UseCaseSensitivePaths = true;
+});
+
 // Add services to the container.
-builder.Services.AddControllers(options => { options.Filters.Add<HttpResponseExceptionFilter>(); })
-    .ConfigureApiBehaviorOptions(options =>
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<HttpResponseExceptionFilter>();
+    options.CacheProfiles.Add("Default30", new CacheProfile { Duration = 30 });
+}).ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = context => new BadRequestObjectResult(context.ModelState) { ContentTypes = { Application.Json, Application.Xml } };
         options.ClientErrorMapping[StatusCodes.Status404NotFound].Link = "https://httpstatuses.com/404";
-    })
-    .AddXmlSerializerFormatters();
+    }).AddXmlSerializerFormatters();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -70,6 +78,21 @@ builder.Services.AddHealthChecks()
     .AddSqlServer(builder.Configuration.GetConnectionString("db"), name: "APIDb-check", tags: new string[] { "apidb" });
 
 var app = builder.Build();
+app.UseResponseCaching();
+
+app.Use(async (context, next) =>
+{
+    context.Response.GetTypedHeaders().CacheControl =
+        new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+        {
+            Public = true,
+            MaxAge = TimeSpan.FromSeconds(10)
+        };
+
+    context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = new string[] { "Accept-Encoding" };
+    await next();
+});
+
 app.UseStaticFiles();
 app.UseRouting();
 

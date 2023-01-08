@@ -1,7 +1,5 @@
 ﻿using Data;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using WebAPI.ViewModels.ShortUrlController.Create.Input;
 using WebAPI.ViewModels.ShortUrlController.Create.Output;
 using WebAPI.ViewModels.ShortUrlController.Get.Input;
@@ -14,6 +12,7 @@ namespace WebAPI.Controllers;
 [Route("[controller]")]
 [ApiController]
 [Produces("application/json")]
+[ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
 public class ShortUrlController : ControllerBase
 {
     private readonly ShortUrlRepository ShortUrlRepository;
@@ -60,6 +59,7 @@ public class ShortUrlController : ControllerBase
     [ActionName(nameof(GetAsync))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<ActionResult<GetViewModelResponse>> GetAsync([FromBody] GetViewModel model)
     {
         var shortUrl = await ShortUrlRepository.GetAsync(model.Path);

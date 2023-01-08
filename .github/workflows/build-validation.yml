@@ -28,7 +28,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore UrlShortener.sln
       
     - name: Build
       run: dotnet build UrlShortener.sln --configuration Release --no-restore

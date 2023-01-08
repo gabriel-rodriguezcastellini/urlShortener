@@ -14,7 +14,11 @@ using WebAPI.Extensions;
 using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<Context>(optionsAction => optionsAction.UseSqlServer(builder.Configuration.GetConnectionString("db")!));
+
+builder.Services.AddDbContext<Context>(optionsAction => optionsAction.UseSqlServer(builder.Configuration.GetConnectionString("db")!, sqlServerOptionsAction =>
+{
+    sqlServerOptionsAction.EnableRetryOnFailure(maxRetryCount: 15, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+}));
 
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)

@@ -9,5 +9,5 @@ public class Context : DbContext
 
 	}
 
-    public DbSet<ShortUrl> ShortUrls { get; set; }
+	public DbSet<ShortUrl> ShortUrls { get; set; } = null!;
 }

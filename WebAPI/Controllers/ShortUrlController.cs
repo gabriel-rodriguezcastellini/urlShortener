@@ -74,7 +74,7 @@ public class ShortUrlController : ControllerBase
             Destination = shortUrl?.Destination
         };
 #pragma warning restore CS8601 // Possible null reference assignment.
-        return  Ok(response);
+        return Ok(response);
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ public class ShortUrlController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateViewModelResponse>> CreateAsync([FromBody] CreateViewModel model)
-    {        
+    {
         var shortUrl = new ShortUrl
         {
             Destination = model.Destination,
@@ -136,7 +136,7 @@ public class ShortUrlController : ControllerBase
         {
             return NotFound();
         }
-        await ShortUrlRepository.DeleteAsync(path);        
+        await ShortUrlRepository.DeleteAsync(path);
         return NoContent();
-    }    
+    }
 }

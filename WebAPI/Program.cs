@@ -29,12 +29,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .WriteTo.Seq(builder.Configuration.GetConnectionString("seq")!));
 
 Serilog.Debugging.SelfLog.Enable(Console.Error);
-
-builder.Services.AddResponseCaching(options =>
-{
-    options.MaximumBodySize = 1024;
-    options.UseCaseSensitivePaths = true;
-});
+builder.Services.AddResponseCaching();
 
 // Add services to the container.
 builder.Services.AddControllers(options =>
@@ -78,21 +73,8 @@ builder.Services.AddHealthChecks()
     .AddSqlServer(builder.Configuration.GetConnectionString("db"), name: "APIDb-check", tags: new string[] { "apidb" });
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseResponseCaching();
-
-app.Use(async (context, next) =>
-{
-    context.Response.GetTypedHeaders().CacheControl =
-        new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
-        {
-            Public = true,
-            MaxAge = TimeSpan.FromSeconds(10)
-        };
-
-    context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = new string[] { "Accept-Encoding" };
-    await next();
-});
-
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -113,16 +95,8 @@ app.UseSwaggerUI(options =>
     options.InjectStylesheet("/swagger-ui/custom.css");
 });
 
-try
-{
-    using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<Context>().Database.MigrateAsync();
-}
-catch (Exception exception)
-{
-    Log.Logger.Error(exception, "An error occurred while migrating the database used on context {DbContextName}", nameof(Context));
-    throw;
-}
+using var scope = app.Services.CreateScope();
+await scope.ServiceProvider.GetRequiredService<Context>().Database.MigrateAsync();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -136,8 +110,21 @@ else
 }
 
 app.ConfigureExceptionHandler();
-app.UseMiddleware<ExceptionMiddleware>();
 app.ConfigureCustomExceptionMiddleware();
 app.UseStatusCodePagesWithReExecute("/StatusCode", "?statusCode={0}");
+
+app.Use(async (context, next) =>
+{
+    context.Response.GetTypedHeaders().CacheControl =
+        new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+        {
+            Public = true,
+            MaxAge = TimeSpan.FromSeconds(10)
+        };
+
+    context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = new string[] { "Accept-Encoding" };
+    await next();
+});
+
 app.MapControllers();
 app.Run();

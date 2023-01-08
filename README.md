@@ -1,10 +1,34 @@
-# UrlShortener
-URL shortener is a service that provides the following features:
-- Given a long URL, the service returns a short URL.
-- Given a short URL, the service returns the original long URL.
-- Obtain service usage statistics.
-- Handling large scale requests.
-- Delete the necessary short URLs.
-- Redirect user to long url when they enter short (valid) url in their browser :)
+<img src="https://github.com/gabriel-rodriguezcastellini/UrlShortener/blob/main/img/shortener.jpeg" alt="URL Shortener logo" title="urlShortener" align="right" height="60" />
 
-Creating a short URL is a very short (< 1 second) process.
+# URL Shortener
+
+.NET Core application, based on a simplified microservice architecture and Docker containers.
+
+## Build Status (GitHub Actions)
+
+[![build](https://github.com/gabriel-rodriguezcastellini/UrlShortener/actions/workflows/build-validation.yml/badge.svg)](https://github.com/gabriel-rodriguezcastellini/UrlShortener/actions/workflows/build-validation.yml)
+
+_**Main** branch contains the latest code and their images are tagged with `:latest` in my [Docker Hub](https://hub.docker.com/repositories/gabrielrodcas)_
+
+## Getting Started
+
+Make sure you have [installed](https://docs.docker.com/docker-for-windows/install/) docker in your environment. After that, you can run the below commands from the **/UrlShortener/** directory and get started immediately.
+
+```powershell
+docker-compose build
+docker-compose up
+```
+
+You should be able to browse different components of the application by using the below URLs :
+
+```
+Web Status : http://host.docker.internal:5052/
+API :  http://host.docker.internal:5051/
+Web Front-end :  http://host.docker.internal:5050/
+Seq :  http://host.docker.internal:5341/
+```
+
+### Architecture overview
+
+This application is cross-platform at the server and client-side, thanks to .NET 6 services capable of running on Linux or Windows containers depending on your Docker host.
+The architecture proposes a microservice oriented architecture implementation using HTTP as the communication protocol between the client app and the microservice.

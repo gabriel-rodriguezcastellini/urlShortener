@@ -40,7 +40,7 @@ public sealed class ShortUrlRepository
         }
     }
 
-    public async Task<ShortUrl?> GetAsync(string path) => await _context.ShortUrls.FirstOrDefaultAsync(x => ShouldSearchByDestination(path) ? x.Destination == path : x.Path == path);
+    public async Task<ShortUrl?> GetAsync(string path) => await _context.ShortUrls.AsNoTracking().FirstOrDefaultAsync(x => ShouldSearchByDestination(path) ? x.Destination == path : x.Path == path);
 
     public async Task<bool> ExistsAsync(string path) => await _context.ShortUrls.AnyAsync(x=> x.Path == path);
 

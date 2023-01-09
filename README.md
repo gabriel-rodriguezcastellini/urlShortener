@@ -8,8 +8,6 @@
 
 [![build](https://github.com/gabriel-rodriguezcastellini/UrlShortener/actions/workflows/build-validation.yml/badge.svg)](https://github.com/gabriel-rodriguezcastellini/UrlShortener/actions/workflows/build-validation.yml)
 
-_**Main** branch contains the latest code and their images are tagged with `:latest` in my [Docker Hub](https://hub.docker.com/repositories/gabrielrodcas)_
-
 ## Getting Started
 
 Make sure you have [installed](https://docs.docker.com/docker-for-windows/install/) docker in your environment. After that, you can run the below commands from the **/UrlShortener/** directory and get started immediately.

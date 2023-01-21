@@ -4,9 +4,9 @@
 
 .NET Core application, based on a simplified microservice architecture and Docker containers.
 
-## Build Status (GitHub Actions)
+## Status (GitHub Actions)
 
-[![build](https://github.com/gabriel-rodriguezcastellini/UrlShortener/actions/workflows/build-validation.yml/badge.svg)](https://github.com/gabriel-rodriguezcastellini/UrlShortener/actions/workflows/build-validation.yml)
+[![build](https://github.com/gabriel-rodriguezcastellini/UrlShortener/actions/workflows/build-validation.yml/badge.svg)](https://github.com/gabriel-rodriguezcastellini/UrlShortener/actions/workflows/build-validation.yml) [![CodeQL](https://github.com/gabriel-rodriguezcastellini/urlShortener/actions/workflows/codeql.yml/badge.svg)](https://github.com/gabriel-rodriguezcastellini/urlShortener/actions/workflows/codeql.yml)
 
 ## Getting Started
 
